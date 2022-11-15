@@ -129,3 +129,10 @@ dmypy.json
 .pyre/
 
 mnt
+
+ext
+chkpt
+*.pt
+*.npy
+*.engine
+*.onnx
