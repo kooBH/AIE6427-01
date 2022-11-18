@@ -76,7 +76,7 @@ if __name__ == "__main__" :
         max_frame = 200,
         sr=16000
         ))
-    model.load_state_dict(torch.load("./chkpt/model.pt")["model"])
+    #model.load_state_dict(torch.load("./chkpt/model.pt")["model"])
     #model.load_state_dict(torch.load("./chkpt/model.pt"))
     model.eval()
     #torch.save(model.state_dict(),"./chkpt/rawnet3.pt",)
@@ -108,7 +108,7 @@ if __name__ == "__main__" :
         'output' : {0 : 'batch_size'}},
         export_params=True,
         #verbose = True,
-        training = False
+        training = torch.onnx.TrainingMode.EVAL
 
         )
 
@@ -129,12 +129,12 @@ if __name__ == "__main__" :
     )
 
 
-    x = np.load("input.npy").astype(np.float32)
+    x = np.load("./data/input.npy").astype(np.float32)
 
     print("ONNX run")
     ort_inputs = {ort_session.get_inputs()[0].name: x}
     ort_outs = ort_session.run(None, ort_inputs)
-    np.save("onnx.npy",ort_outs[0])
+    np.save("./data/onnx.npy",ort_outs[0])
     print(ort_outs[0].shape)
 
     print("torch run")
@@ -142,7 +142,7 @@ if __name__ == "__main__" :
     model = model
     torch_out = model(torch.from_numpy(x).float())
     torch_out = torch_out.detach().numpy()
-    np.save("pytorch.npy",torch_out)
+    np.save("./data/pytorch.npy",torch_out)
     print(torch_out.shape)
     
     np.testing.assert_allclose(torch_out, ort_outs[0], rtol=1e-03, atol=1e-03)
