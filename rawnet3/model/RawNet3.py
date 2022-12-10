@@ -15,10 +15,10 @@ class RawNet3(nn.Module):
     def __init__(self, block, model_scale, context, summed, C=1024, sr=16000 , **kwargs):
         super().__init__()
 
-        nOut = kwargs["nOut"]
+        nOut = 256
 
         self.context = context
-        self.encoder_type = kwargs["encoder_type"]
+        self.encoder_type = "ECA"
         self.log_sinc = kwargs["log_sinc"]
         self.norm_sinc = kwargs["norm_sinc"]
         self.out_bn = kwargs["out_bn"]
@@ -45,7 +45,7 @@ class RawNet3(nn.Module):
             ParamSincFB(
                 C // 4,
                 251,
-                stride=kwargs["sinc_stride"],
+                stride=10,
                 sample_rate =  sr
             )
         )
@@ -85,7 +85,8 @@ class RawNet3(nn.Module):
         self.bn6 = nn.BatchNorm1d(nOut)
 
         self.mp3 = nn.MaxPool1d(3)
-
+        
+    @torch.cuda.amp.autocast()
     def forward(self, x):
         """
         :param x: input mini-batch (bs, samp)

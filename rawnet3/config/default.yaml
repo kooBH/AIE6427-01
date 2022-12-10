@@ -1,0 +1,42 @@
+train :
+  batch_size : 64
+  epoch : 20
+  num_workers : 16
+  optimizer: 'adam'
+  adam: 0.0001
+  adabound:
+    initial: 0.001
+    final: 0.05
+  frame_num: 128
+  summary_interval: 10
+  validation_interval: 100
+  checkpoint_interval: 1000
+---
+model : 
+  block : 
+---
+classifier :
+  margin : 0.3
+---
+loss :
+  type : CrossEntropyLoss
+---
+scheduler: # Plateau, oneCycle, None
+  type: CosineAnnealingLR
+  oneCycle:
+    max_lr: 0.0001
+  CosineAnnealingLR : 
+    T_max : 100
+    eta_min : 0.000001
+
+---
+data : 
+  sr : 16000
+  len_sec : 2.0
+  vox1 : /home/data2/kbh/voxceleb1/vox1/train/
+  vox1_train_class : 1211
+  vox2 : /home/data2/kbh/voxceleb2_wav/
+  vox2_train_class : 5994
+---
+log:
+  root: '/home/nas/user/kbh/'
