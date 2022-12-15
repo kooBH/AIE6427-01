@@ -36,7 +36,7 @@ In the docker, run ```rawnet3/onxx2trt.sh```
 ## How to Use Triton Inferense Server  
 Run ```TRTIS/run_TRTIS.sh``` for inferense Server.  
 Run ```TRTIS/run_client.sh``` for client Server.  
-In the client server, use ```/host_ws/TRTIS/infer.py``` for client-side infernece.
+In the client server, first run ```TRTIS/install_client_dependency.sh``` for dependency and  use ```/host_ws/TRTIS/infer.py``` for client-side infernece.
 
 
 
