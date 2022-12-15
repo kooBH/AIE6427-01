@@ -1,0 +1,7 @@
+librosa
+onnx
+torch
+onnxruntime
+tqdm
+tensorboardX
+asteroid_filterbanks
