@@ -33,6 +33,7 @@ from numpy import dot
 from numpy.linalg import norm
 import sys
 import gevent.ssl
+import time
 
 import tritonclient.http as httpclient
 from tritonclient.utils import InferenceServerException
@@ -176,7 +177,7 @@ if __name__ == '__main__':
         sys.exit(1)
     """
     output = results.as_numpy('output')[0,:]
-    print(output.shape)
+    #print(output.shape)
 
 
 
@@ -184,6 +185,9 @@ if __name__ == '__main__':
 
 
     # Rocognition
+
+    tic = time.time()
+    total_proc = 0
     if FLAGS.enroll is None : 
       list_of_enroll = glob.glob(os.path.join("..","data","embed","*"))
       print("{}".format(FLAGS.path))
@@ -199,14 +203,24 @@ if __name__ == '__main__':
           enroll = np.load(item_enroll)
           cos_sim = dot(enroll, output)/(norm(enroll)*norm(output))
           total_cos_sim+=cos_sim
+          total_proc+=1
         mean_cos_sim = total_cos_sim/len(list_item)
         arr_score[idx] = mean_cos_sim
         idx+=1
         #print("similarity {} | {} ".format(name,mean_cos_sim))
       val_max = np.max(arr_score)
       idx_max = np.argmax(arr_score)
+      toc = time.time()
 
       print("Most Similar : {} | {:.4f} ".format(list_of_enroll[idx_max].split("/")[-1],val_max))
+
+      val_min = np.min(arr_score)
+      idx_min = np.argmin(arr_score)
+      print("Least Similar : {} | {:.4f} ".format(list_of_enroll[idx_min].split("/")[-1],val_min))
+
+      print("AVG : {:.4f}".format(np.mean(arr_score)))
+
+      #print("Total Elpased time {:4} | agv for single data {:8}".format(toc-tic,(toc-tic)/total_proc))
 
     # Enrollment
     else : 
