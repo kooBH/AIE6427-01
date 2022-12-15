@@ -38,7 +38,13 @@ Run ```TRTIS/run_TRTIS.sh``` for inferense Server.
 Run ```TRTIS/run_client.sh``` for client Server.  
 In the client server, first run ```TRTIS/install_client_dependency.sh``` for dependency and  use ```/host_ws/TRTIS/infer.py``` for client-side infernece.
 
+## TRTIS
 
+[model.plan of v2](https://drive.google.com/file/d/1xk_3on9PGGPc2BOyWZmDtpOrLpY4zPLD/view?usp=sharing)  
+Place it into
+```
+TRTIS/repository/rawnet3/2/model.plan
+```
 
 # Reference
 
