@@ -136,3 +136,5 @@ chkpt
 *.npy
 *.engine
 *.onnx
+
+data

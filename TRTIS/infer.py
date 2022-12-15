@@ -25,8 +25,12 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import glob,os
+import librosa as rs
 import argparse
 import numpy as np
+from numpy import dot
+from numpy.linalg import norm
 import sys
 import gevent.ssl
 
@@ -53,6 +57,7 @@ max_batch_size: 1
 """
 def test_infer(model_name,
                input0_data,
+               model_version="",
                headers=None,
                request_compression_algorithm=None,
                response_compression_algorithm=None):
@@ -68,6 +73,7 @@ def test_infer(model_name,
     results = triton_client.infer(
         model_name,
         inputs,
+        model_version=model_version,
         outputs=outputs,
         query_params=query_params,
         headers=headers,
@@ -75,6 +81,7 @@ def test_infer(model_name,
         response_compression_algorithm=response_compression_algorithm)
 
     return results
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -114,6 +121,24 @@ if __name__ == '__main__':
         help=
         'The compression algorithm to be used when receiving response body from server. Default is None.'
     )
+    parser.add_argument(
+      "--path",
+      type=str,
+      required=True,
+      help="path of input"
+    )
+    parser.add_argument(
+      "--enroll",
+      type=str,
+      required=False,
+      default=None,
+      help="enroll Speaker Feature"
+    )
+    parser.add_argument(
+      "--version",
+      type=str,
+      default="v0"
+    )
 
     FLAGS = parser.parse_args()
     triton_client = httpclient.InferenceServerClient(
@@ -130,22 +155,69 @@ if __name__ == '__main__':
     else:
         headers_dict = None
 
-    input0_data = np.zeros(64000,np.float32)
-    input0_data = np.expand_dims(input0_data, axis=0)
+    
+    data_in = np.random.rand(64000)
+    data_in = rs.load(FLAGS.path,sr=16000,mono=True)[0]
+    data_in = data_in[-64000:]
+    data_in = np.expand_dims(data_in, axis=0)
+    data_in = data_in.astype(np.float32)
 
     # Infer with requested Outputs
-    results = test_infer(model_name, input0_data, headers_dict,
-                         FLAGS.request_compression_algorithm,
-                         FLAGS.response_compression_algorithm)
+    results = test_infer(model_name, data_in,model_version=FLAGS.version, headers=headers_dict,
+                         request_compression_algorithm=FLAGS.request_compression_algorithm,
+                         response_compression_algorithm=FLAGS.response_compression_algorithm)
+    """
     print(results.get_response())
-
     statistics = triton_client.get_inference_statistics(model_name=model_name,
                                                         headers=headers_dict)
     print(statistics)
     if len(statistics['model_stats']) != 1:
         print("FAILED: Inference Statistics")
         sys.exit(1)
+    """
+    output = results.as_numpy('output')[0,:]
+    print(output.shape)
 
-    output0_data = results.as_numpy('output')
-    print(output0_data.shape)
-    print(output0_data)
+
+
+    ######################
+
+
+    # Rocognition
+    if FLAGS.enroll is None : 
+      list_of_enroll = glob.glob(os.path.join("..","data","embed","*"))
+      print("{}".format(FLAGS.path))
+      arr_score = np.zeros(len(list_of_enroll))
+      idx = 0
+      for dir_enroll in list_of_enroll : 
+        name = dir_enroll.split("/")[-1]
+        list_item = glob.glob(os.path.join(dir_enroll,"*.npy"))
+
+        total_cos_sim = 0 
+
+        for item_enroll in list_item : 
+          enroll = np.load(item_enroll)
+          cos_sim = dot(enroll, output)/(norm(enroll)*norm(output))
+          total_cos_sim+=cos_sim
+        mean_cos_sim = total_cos_sim/len(list_item)
+        arr_score[idx] = mean_cos_sim
+        idx+=1
+        #print("similarity {} | {} ".format(name,mean_cos_sim))
+      val_max = np.max(arr_score)
+      idx_max = np.argmax(arr_score)
+
+      print("Most Similar : {} | {:.4f} ".format(list_of_enroll[idx_max].split("/")[-1],val_max))
+
+    # Enrollment
+    else : 
+      name = FLAGS.enroll
+      n_enroll = len(glob.glob(os.path.join("..","data","embed",name,"*.npy")))
+      if n_enroll == 0 :
+        os.makedirs(os.path.join("..","data","embed",name),exist_ok=True)
+      id_enroll = n_enroll+1
+      path_out = "../data/embed/{}/{}".format(name,id_enroll)
+      np.save(path_out,output[0])
+      print("SAVE::"+path_out)
+    
+
+

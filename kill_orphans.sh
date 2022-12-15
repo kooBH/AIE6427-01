@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #DEVICE=audio_
-DEVICE=infer
+DEVICE=train
 
 #DEVICE=AIO
 #DEVICE=train
