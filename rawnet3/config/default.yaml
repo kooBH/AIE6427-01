@@ -39,4 +39,4 @@ data :
   vox2_train_class : 5994
 ---
 log:
-  root: '/home/nas/user/kbh/'
+  root: '/home/nas/user/kbh/AIE6427_CS'
