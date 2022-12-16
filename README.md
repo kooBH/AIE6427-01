@@ -1,6 +1,6 @@
 # AIE6427-01  
 
-## What this do  
+## What this does  
 
 Speaker Recognition Using Rawnet3 on Trition Inference Server.  
 
