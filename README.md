@@ -9,7 +9,7 @@ Speaker Recognition Using Rawnet3 on Trition Inference Server.
 ## NOTE
 
 * for all ```.sh``` scripts use may need to change hard-coded paths  
-+ All versions should be matched. to match pytorch version I used pytorch docker.
++ All versions of environments should be matched. to match pytorch version I used pytorch docker.
     + nvcr.io/nvidia/pytorch:22.10-py3
     + nvcr.io/nvidia/tensorrt:22.10-py3
     + nvcr.io/nvidia/tritonserver:22.10-py3
@@ -17,7 +17,6 @@ Speaker Recognition Using Rawnet3 on Trition Inference Server.
     + CUDA Version 11.8
 
     If any of these dosen't match, there may be error.  
-
 
 ## How to Train  
 Run ```rawnet3/train.sh```. see ```rawnet3/train_d1.sh``` for detail usage.  
@@ -32,19 +31,22 @@ Run ```rawnet3/torch2onnx.py``` with  ```rawnet3/torch2onnx.sh```.
 And to use ```trtexec```, run ```run_trt_docker.sh```.  
 In the docker, run ```rawnet3/onxx2trt.sh```
 
-
-## How to Use Triton Inferense Server  
-Run ```TRTIS/run_TRTIS.sh``` for inferense Server.  
-Run ```TRTIS/run_client.sh``` for client Server.  
-In the client server, first run ```TRTIS/install_client_dependency.sh``` for dependency and  use ```/host_ws/TRTIS/infer.py``` for client-side infernece.
-
-## TRTIS
+## Triton Inferense Server  
 
 [model.plan of v2](https://drive.google.com/file/d/1xk_3on9PGGPc2BOyWZmDtpOrLpY4zPLD/view?usp=sharing)  
 Place it into
 ```
 TRTIS/repository/rawnet3/2/model.plan
 ```
+
+## How to Use Triton Inferense Server  
+Run ```TRTIS/run_TRTIS.sh``` for inferense Server.  
+Run ```TRTIS/run_client.sh``` for client Server.  
+In the client server, first run ```TRTIS/install_client_dependency.sh``` for dependency and  use ```/host_ws/TRTIS/infer.py``` for client-side infernece.  
+
+see ```TRTIS/enroll.sh``` and ```TRTIS/eval.sh``` for detail usage.  
+
+
 
 # Reference
 
