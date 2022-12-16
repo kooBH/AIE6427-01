@@ -73,20 +73,18 @@ def test_infer(model_name,
     query_params = {'test_1': 1}
 
     tic = time.time()
-    results = triton_client.infer(
-        model_name,
-        inputs,
-        model_version=model_version,
-        outputs=outputs,
-        query_params=query_params,
-        headers=headers,
-        request_compression_algorithm=request_compression_algorithm,
-        response_compression_algorithm=response_compression_algorithm)
+    for i in range(100) : 
+      results = triton_client.infer(
+          model_name,
+          inputs,
+          model_version=model_version,
+          outputs=outputs,
+          query_params=query_params,
+          headers=headers,
+          request_compression_algorithm=request_compression_algorithm,
+          response_compression_algorithm=response_compression_algorithm)
     toc = time.time()
-    print("Total Elpased time {:4}".format(toc-tic))
-
-    return results
-
+    print("Elapsed Time for processing {} data : {:.4f}".format(100,toc-tic))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -168,70 +166,8 @@ if __name__ == '__main__':
     data_in = data_in.astype(np.float32)
 
     # Infer with requested Outputs
+
     results = test_infer(model_name, data_in,model_version=FLAGS.version, headers=headers_dict,
                          request_compression_algorithm=FLAGS.request_compression_algorithm,
                          response_compression_algorithm=FLAGS.response_compression_algorithm)
-    """
-    print(results.get_response())
-    statistics = triton_client.get_inference_statistics(model_name=model_name,
-                                                        headers=headers_dict)
-    print(statistics)
-    if len(statistics['model_stats']) != 1:
-        print("FAILED: Inference Statistics")
-        sys.exit(1)
-    """
-    output = results.as_numpy('output')[0,:]
-    #print(output.shape)
-
-
-
-    ######################
-
-
-    # Rocognition
-
-    total_proc = 0
-    if FLAGS.enroll is None : 
-      list_of_enroll = glob.glob(os.path.join("..","data","embed","*"))
-      print("{}".format(FLAGS.path))
-      arr_score = np.zeros(len(list_of_enroll))
-      idx = 0
-      for dir_enroll in list_of_enroll : 
-        name = dir_enroll.split("/")[-1]
-        list_item = glob.glob(os.path.join(dir_enroll,"*.npy"))
-
-        total_cos_sim = 0 
-
-        for item_enroll in list_item : 
-          enroll = np.load(item_enroll)
-          cos_sim = dot(enroll, output)/(norm(enroll)*norm(output))
-          total_cos_sim+=cos_sim
-          total_proc+=1
-        mean_cos_sim = total_cos_sim/len(list_item)
-        arr_score[idx] = mean_cos_sim
-        idx+=1
-        #print("similarity {} | {} ".format(name,mean_cos_sim))
-      val_max = np.max(arr_score)
-      idx_max = np.argmax(arr_score)
-
-      #print("Most Similar : {} | {:.4f} ".format(list_of_enroll[idx_max].split("/")[-1],val_max))
-
-      val_min = np.min(arr_score)
-      idx_min = np.argmin(arr_score)
-#      print("Least Similar : {} | {:.4f} ".format(list_of_enroll[idx_min].split("/")[-1],val_min))
-
-#      print("AVG : {:.4f}".format(np.mean(arr_score)))
-
-    # Enrollment
-    else : 
-      name = FLAGS.enroll
-      n_enroll = len(glob.glob(os.path.join("..","data","embed",name,"*.npy")))
-      if n_enroll == 0 :
-        os.makedirs(os.path.join("..","data","embed",name),exist_ok=True)
-      id_enroll = n_enroll+1
-      path_out = "../data/embed/{}/{}".format(name,id_enroll)
-      np.save(path_out,output[0])
-      print("SAVE::"+path_out)
-    
-
-
+   
